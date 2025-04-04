@@ -5,18 +5,11 @@ FORBIDDEN_UTILS="socat nc netcat php lua telnet ncat cryptcat rlwrap msfconsole 
 
 PORT=${PORT:-8080}
 
-# Установка зависимостей
-apt-get update
-apt-get install -y curl python3 python3-pip
-pip3 install --no-cache-dir hikka  # Установка hikka, если она доступна через pip
-
-# Проверка наличия KOYEB_PUBLIC_DOMAIN
 if [ -z "$KOYEB_PUBLIC_DOMAIN" ]; then
     echo "KOYEB_PUBLIC_DOMAIN не установлен"
     exit 1
 fi
 
-# Функция keep-alive с рандомным тайм-аутом
 keep_alive_local() {
     while true; do
         random_timeout=$((40 + RANDOM % 51))
@@ -29,7 +22,6 @@ keep_alive_local() {
     done
 }
 
-# Функция проверки и удаления запрещенных утилит
 monitor_forbidden() {
     while true; do
         for cmd in $FORBIDDEN_UTILS; do
@@ -46,7 +38,6 @@ monitor_forbidden() {
     done
 }
 
-# Запуск hikka
 start_hikka() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [INFO] Запуск Hikka на порту $PORT"
     python3 -m hikka --port "$PORT" &
@@ -54,10 +45,8 @@ start_hikka() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [INFO] Hikka запущена с PID: $HIKKA_PID"
 }
 
-# Запуск всех задач
 start_hikka
 keep_alive_local &
 monitor_forbidden &
 
-# Удержание основного процесса
 tail -f /dev/null
